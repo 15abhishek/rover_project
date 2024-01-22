@@ -51,10 +51,13 @@ void backward()
 
 void setup() {
   // put your setup code here, to run once:
-
+  motor_pin_config();
 }
 
 void loop() {
   // put your main code here, to run repeatedly:
-
+  forward();
+  delay(1000);
+  backward();
+  delay(1000);
 }

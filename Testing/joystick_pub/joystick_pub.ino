@@ -1,5 +1,6 @@
-#include <micro_ros_arduino.h>
+#include <WiFi.h>
 
+#include <micro_ros_arduino.h>
 #include <stdio.h>
 #include <rcl/rcl.h>
 #include <rcl/error_handling.h>
@@ -15,6 +16,10 @@
 //Pin definition
 #define xAxis 32
 int x_val = 0;
+
+// WiFi setup
+char* ssid     = "Airtel_WIFI_203";
+char* password = "V@12345678";
 
 rcl_publisher_t publisher;
 std_msgs__msg__Int32 msg;
@@ -49,7 +54,11 @@ void setup() {
   
   pinMode(xAxis, INPUT);
   
-  set_microros_wifi_transports("Airtel_WIFI_203", "V@12345678", "192.168.43.225", 7777);
+  set_microros_wifi_transports(ssid, password, "192.168.1.7", 6666);
+
+  delay(2000);
+  Serial.println(WiFi.status());
+  Serial.println(WiFi.localIP());
 
   pinMode(LED_PIN, OUTPUT);
   digitalWrite(LED_PIN, HIGH);
