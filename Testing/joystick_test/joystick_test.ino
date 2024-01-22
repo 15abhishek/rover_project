@@ -25,12 +25,12 @@ void loop() {
   }
 //  x_val = analogRead(xAxis);
     
-//  Serial.print("x-Axis: ");
-//  Serial.print(x_val);
+  Serial.print("x-Axis: ");
+  Serial.print(x_val);
 //  Serial.print(" , y-Axis: ");
 //  Serial.print(y_val);
-  Serial.print(" , Switch: "); 
-  Serial.print(sw_val);
+//  Serial.print(" , Switch: "); 
+//  Serial.print(sw_val);
   Serial.println();
 //  delay(500);
 }
