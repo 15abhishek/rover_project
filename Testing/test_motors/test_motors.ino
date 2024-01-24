@@ -1,52 +1,75 @@
 //Defining all motor pins
-#define flMotor1  18
-#define flMotor2  19
-#define frMotor1  21
-#define frMotor2  22
-#define blMotor1  23
-#define blMotor2  25
-#define brMotor1  26
-#define brMotor2  27
+#define fl_motor1  26
+#define fl_motor2  27
+#define fl_pwm     25
+
+#define fr_motor1  12
+#define fr_motor2  13
+#define fr_pwm     14
+
+#define bl_motor1   2
+#define bl_motor2   4
+#define bl_pwm     15
+
+#define br_motor1  18
+#define br_motor2  19
+#define br_pwm      5
 
 //PWM configuration
 const int freq = 900;
 const int resolution = 8;
 const int channel = 0;
 
+int pwm = 0;
+
 void motor_pin_config(void)
 {
-  pinMode(flMotor1,OUTPUT);
-  pinMode(flMotor2,OUTPUT);
-  pinMode(frMotor1,OUTPUT);
-  pinMode(frMotor2,OUTPUT);
-  pinMode(blMotor1,OUTPUT);
-  pinMode(blMotor2,OUTPUT);
-  pinMode(brMotor1,OUTPUT);
-  pinMode(brMotor2,OUTPUT);
+  pinMode(fl_pwm,OUTPUT);
+  pinMode(fr_pwm,OUTPUT);
+  pinMode(bl_pwm,OUTPUT);
+  pinMode(br_pwm,OUTPUT);
+
+  ledcSetup(channel, freq, resolution);
+  ledcAttachPin(fl_pwm, channel);
+  ledcAttachPin(fr_pwm, channel);
+  ledcAttachPin(bl_pwm, channel);
+  ledcAttachPin(br_pwm, channel);
+  
+  pinMode(fl_motor1,OUTPUT);
+  pinMode(fl_motor2,OUTPUT);
+  pinMode(fr_motor1,OUTPUT);
+  pinMode(fr_motor2,OUTPUT);
+  pinMode(bl_motor1,OUTPUT);
+  pinMode(bl_motor2,OUTPUT);
+  pinMode(br_motor1,OUTPUT);
+  pinMode(br_motor2,OUTPUT);
 }
 
-void forward()
+void forward(int pwm)
 {
-  digitalWrite(flMotor1,HIGH);
-  digitalWrite(flMotor2,LOW);
-  digitalWrite(frMotor1,HIGH);
-  digitalWrite(frMotor2,LOW);
-  digitalWrite(blMotor1,HIGH);
-  digitalWrite(blMotor2,LOW);
-  digitalWrite(brMotor1,HIGH);
-  digitalWrite(brMotor2,LOW);
+  
+  ledcWrite(channel, pwm);
+  digitalWrite(fl_motor1,HIGH);
+  digitalWrite(fl_motor2,LOW);
+  digitalWrite(fr_motor1,HIGH);
+  digitalWrite(fr_motor2,LOW);
+  digitalWrite(bl_motor1,HIGH);
+  digitalWrite(bl_motor2,LOW);
+  digitalWrite(br_motor1,HIGH);
+  digitalWrite(br_motor2,LOW);
 }
 
-void backward()
+void backward(int pwm)
 {
-  digitalWrite(flMotor1,LOW);
-  digitalWrite(flMotor2,HIGH);
-  digitalWrite(frMotor1,LOW);
-  digitalWrite(frMotor2,HIGH);
-  digitalWrite(blMotor1,LOW);
-  digitalWrite(blMotor2,HIGH);
-  digitalWrite(brMotor1,LOW);
-  digitalWrite(brMotor2,HIGH);
+  ledcWrite(channel, pwm);
+  digitalWrite(fl_motor1,LOW);
+  digitalWrite(fl_motor2,HIGH);
+  digitalWrite(fr_motor1,LOW);
+  digitalWrite(fr_motor2,HIGH);
+  digitalWrite(bl_motor1,LOW);
+  digitalWrite(bl_motor2,HIGH);
+  digitalWrite(br_motor1,LOW);
+  digitalWrite(br_motor2,HIGH);
 }
 
 void setup() {
@@ -55,9 +78,9 @@ void setup() {
 }
 
 void loop() {
-  // put your main code here, to run repeatedly:
-  forward();
+  pwm = 200;  
+  forward(pwm);
   delay(1000);
-  backward();
+  backward(pwm);
   delay(1000);
 }
