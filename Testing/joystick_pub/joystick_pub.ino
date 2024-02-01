@@ -54,7 +54,7 @@ void setup() {
   
   pinMode(xAxis, INPUT);
   
-  set_microros_wifi_transports("WIFI", "a9111707000", "192.168.137.240", 6666);
+  set_microros_wifi_transports("WIFI", "a9111707000", "192.168.43.225", 6666);
 
   delay(2000);
   Serial.println(WiFi.status());
