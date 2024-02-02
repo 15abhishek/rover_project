@@ -210,7 +210,7 @@ void left(int pwm)
 void slight_right(int pwm)
 {
   ledcWrite(channel, pwm);
-  ledcWrite(channel2, (pwm-100));
+  ledcWrite(channel2, (0));
   digitalWrite(fl_motor1,HIGH);
   digitalWrite(fl_motor2,LOW);
   digitalWrite(fr_motor1,HIGH);
@@ -223,7 +223,7 @@ void slight_right(int pwm)
 
 void slight_left(int pwm)
 {
-  ledcWrite(channel, (pwm-100));
+  ledcWrite(channel, (0));
   ledcWrite(channel2, pwm);
   digitalWrite(fl_motor1,HIGH);
   digitalWrite(fl_motor2,LOW);
