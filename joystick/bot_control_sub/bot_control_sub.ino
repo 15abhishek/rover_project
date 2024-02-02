@@ -9,6 +9,7 @@
 #include <geometry_msgs/msg/twist.h>
 
 rcl_subscription_t subscriber;
+rcl_subscription_t best_effort_subscriber;
 geometry_msgs__msg__Twist msg;
 rclc_executor_t executor;
 rcl_allocator_t allocator;
@@ -101,7 +102,7 @@ void subscription_callback(const void *msgin) {
 }
 
 void setup() {
-  Serial.begin(115200);
+//  Serial.begin(115200);
   motor_pin_config();
   
   set_microros_wifi_transports("WIFI", "a9111707000", "192.168.43.225", 8888);
@@ -121,11 +122,11 @@ void setup() {
   RCCHECK(rclc_node_init_default(&node, "bot_node", "", &support));
 
   // create subscriber
-  RCCHECK(rclc_subscription_init_default(
+  RCCHECK(rclc_subscription_init_best_effort(
     &subscriber,
     &node,
     ROSIDL_GET_MSG_TYPE_SUPPORT(geometry_msgs, msg, Twist),
-    "/cmd_vel"));
+    "cmd_vel"));
 
   // create executor
   RCCHECK(rclc_executor_init(&executor, &support.context, 1, &allocator));
@@ -134,10 +135,34 @@ void setup() {
 }
 
 void loop() {
-  delay(100);
+//  delay(100);
   RCCHECK(rclc_executor_spin_some(&executor, RCL_MS_TO_NS(1)));
   int pwm = int(msg.linear.x);
-  forward(pwm);
+  int dir = int(msg.angular.z);
+
+  if(pwm > 50){
+    if(dir > -50 and dir < 50){
+    forward(pwm);
+    }
+    else if(dir > 50){
+      slight_right(dir);
+    }
+    else if(dir < -50){
+      slight_left(-dir);
+    }
+  }
+  else if(pwm < -50 and dir > -50 and dir < 50){
+    backward(-pwm);
+  }
+  else if(pwm > -50 and pwm < 50 and dir < -50){
+    left(-dir);
+  }
+  else if(pwm > -50 and pwm < 50 and dir > 50){
+    right(dir);
+  }
+  else{
+    stop_bot();
+  }
 }
 
 void backward(int pwm)
@@ -208,4 +233,18 @@ void slight_left(int pwm)
   digitalWrite(bl_motor2,LOW);
   digitalWrite(br_motor1,HIGH);
   digitalWrite(br_motor2,LOW);
+}
+
+void stop_bot()
+{
+  ledcWrite(channel, 0);
+  ledcWrite(channel2, 0);
+  digitalWrite(fl_motor1,HIGH);
+  digitalWrite(fl_motor2,HIGH);
+  digitalWrite(fr_motor1,HIGH);
+  digitalWrite(fr_motor2,HIGH);
+  digitalWrite(bl_motor1,HIGH);
+  digitalWrite(bl_motor2,HIGH);
+  digitalWrite(br_motor1,HIGH);
+  digitalWrite(br_motor2,HIGH);
 }
