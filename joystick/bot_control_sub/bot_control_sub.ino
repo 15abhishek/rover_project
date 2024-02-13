@@ -122,7 +122,7 @@ void setup() {
   RCCHECK(rclc_node_init_default(&node, "bot_node", "", &support));
 
   // create subscriber
-  RCCHECK(rclc_subscription_init_best_effort(
+  RCCHECK(rclc_subscription_init_default(
     &subscriber,
     &node,
     ROSIDL_GET_MSG_TYPE_SUPPORT(geometry_msgs, msg, Twist),

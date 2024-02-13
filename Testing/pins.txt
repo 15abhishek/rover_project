@@ -1,0 +1,37 @@
+Front Left Motor
+	A - 2
+	B - 4
+	P - 15
+	
+Front Right Motor
+	A - 14
+	B - 12
+	P - 13
+	
+Rear Left Motor
+	A - 27
+	B - 26
+	P - 25
+	
+Rear Right Motor
+	A - 5
+	B - 18
+	P - 19
+	
+ENCODERS
+
+Front Left Motor
+	A - 22
+	B - 34
+	
+Front Right Motor
+	A - 16 	(tx2)
+	B - 17	(rx2)
+	
+Rear Left Motor
+	A - 32
+	B - 33
+	
+Rear Right Motor
+	A - 23
+	B - 35
