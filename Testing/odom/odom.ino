@@ -7,11 +7,11 @@
 #define FR_ROTARY_ENCODER_A_PIN 23
 #define FR_ROTARY_ENCODER_B_PIN 35
 
-#define RL_ROTARY_ENCODER_A_PIN 32
-#define RL_ROTARY_ENCODER_B_PIN 33
+#define RL_ROTARY_ENCODER_A_PIN 16
+#define RL_ROTARY_ENCODER_B_PIN 17
 
-#define RR_ROTARY_ENCODER_A_PIN 16
-#define RR_ROTARY_ENCODER_B_PIN 17
+#define RR_ROTARY_ENCODER_A_PIN 32
+#define RR_ROTARY_ENCODER_B_PIN 33
 
 #define ROTARY_ENCODER_BUTTON_PIN 23
 
@@ -20,7 +20,10 @@
 uint16_t loop_delay = 10; // milliseconds
 float delay_s;
 
-int robot_width = 0.235;
+const int enc_res = 540;
+
+const float robot_width = 0.235;
+const float wheel_radius = 0.05;
 
 int enc_FL = 0; // encoder tics
 int enc_RL = 0; // encoder tics
@@ -99,10 +102,10 @@ void loop()
 {
   delay_s = (float)loop_delay / (float)1000;
 
-  enc_FR = rotaryEncoderFR.readEncoder()
-  enc_FL = rotaryEncoderFL.readEncoder()
-  enc_RR = rotaryEncoderRR.readEncoder()
-  enc_RL = rotaryEncoderRL.readEncoder()
+  enc_FR = -rotaryEncoderFR.readEncoder();
+  enc_FL = rotaryEncoderFL.readEncoder();
+  enc_RR = -rotaryEncoderFR.readEncoder();
+  enc_RL = rotaryEncoderFL.readEncoder();
 
   wheel_FL_ang_pos = 2 * 3.14 * enc_FL / enc_res;
   wheel_FR_ang_pos = 2 * 3.14 * enc_FR / enc_res;
@@ -112,11 +115,12 @@ void loop()
   enc_L = (enc_FL + enc_RL) / 2 ;
   enc_R = (enc_FR + enc_RR) / 2 ;
 
-  wheel_L_ang_pos = 2 * 3.14 * enc_L / enc_res;
-  wheel_R_ang_pos = 2 * 3.14 * enc_R / enc_res; 
-
   wheel_L_ang_vel = ((2 * 3.14 * enc_L / enc_res) - wheel_L_ang_pos) / delay_s;
   wheel_R_ang_vel = ((2 * 3.14 * enc_R / enc_res) - wheel_R_ang_pos) / delay_s;
+
+  wheel_L_ang_pos = 2 * 3.14 * enc_L / enc_res;
+  wheel_R_ang_pos = 2 * 3.14 * enc_R / enc_res; 
+    
 
   robot_angular_vel = (((wheel_R_ang_pos - wheel_L_ang_pos) * wheel_radius / (robot_width)) - robot_angular_pos) / delay_s;
   robot_angular_pos = (wheel_R_ang_pos - wheel_L_ang_pos) * wheel_radius / (robot_width);
@@ -125,7 +129,10 @@ void loop()
   robot_x_pos = robot_x_pos + robot_x_vel * delay_s;
   robot_y_pos = robot_y_pos + robot_y_vel * delay_s;
 
-  Serial.println(robot_x_pos);
-  Serial.println(robot_y_pos);
-  delay(loop_delay);
+  Serial.print("x_vel: ");
+  Serial.print(robot_x_pos);
+  Serial.print(", y_vel: ");
+  Serial.print(robot_y_pos);
+  Serial.println();
+//  delay(loop_delay);
 }
