@@ -11,6 +11,7 @@
 
 #include <geometry_msgs/msg/twist.h>
 #include <nav_msgs/msg/odometry.h>
+#include <std_msgs/msg/int32_multi_array.h>
 
 #if !defined(ESP32) && !defined(TARGET_PORTENTA_H7_M7) && !defined(ARDUINO_NANO_RP2040_CONNECT) && !defined(ARDUINO_WIO_TERMINAL)
 #error This example is only avaible for Arduino Portenta, Arduino Nano RP2040 Connect, ESP32 Dev module and Wio Terminal
@@ -22,8 +23,8 @@
 #define fl_pwm     15
 
 #define fr_motor1  14
-#define fr_motor2  12
-#define fr_pwm     13
+#define fr_motor2  13
+#define fr_pwm     12
 
 #define bl_motor1  27
 #define bl_motor2  26
@@ -62,6 +63,8 @@ volatile int encFR = 0;
 volatile int encRL = 0;
 volatile int encRR = 0;
 
+int enc[4] = {0, 0, 0, 0};
+
 // Motor Functions
 void motor_pin_config(void)
 {
@@ -72,9 +75,9 @@ void motor_pin_config(void)
 
   ledcSetup(channel, freq, resolution);
   ledcAttachPin(fl_pwm, channel);
-  ledcAttachPin(fr_pwm, channel2);
+  ledcAttachPin(fr_pwm, channel);
   ledcAttachPin(bl_pwm, channel);
-  ledcAttachPin(br_pwm, channel2);
+  ledcAttachPin(br_pwm, channel);
   
   pinMode(fl_motor1,OUTPUT);
   pinMode(fl_motor2,OUTPUT);
@@ -88,24 +91,24 @@ void motor_pin_config(void)
 
 void move_bot(int pwm, int dir)
 {
-  if(pwm > 50){
-    if(dir > -50 and dir < 50){
+  if(pwm > 30){
+    if(dir > -30 and dir < 30){
     forward(pwm);
     }
-    else if(dir > 50){
-      slight_right(dir);
-    }
-    else if(dir < -50){
-      slight_left(-dir);
-    }
+//    else if(dir > 50){
+//      slight_right(dir);
+//    }
+//    else if(dir < -50){
+//      slight_left(-dir);
+//    }
   }
-  else if(pwm < -50 and dir > -50 and dir < 50){
+  else if(pwm < -30 and dir > -50 and dir < 30){
     backward(-pwm);
   }
-  else if(pwm > -50 and pwm < 50 and dir < -50){
+  else if(pwm > -30 and pwm < 30 and dir < -30){
     left(-dir);
   }
-  else if(pwm > -50 and pwm < 50 and dir > 50){
+  else if(pwm > -30 and pwm < 30 and dir > 30){
     right(dir);
   }
   else{
@@ -265,12 +268,19 @@ void read_encoder_values()
   encFR = rotaryEncoderFR.readEncoder();
   encRL = rotaryEncoderRL.readEncoder();
   encRR = rotaryEncoderRR.readEncoder();
+
+  // Update the global enc array
+  enc[0] = encFL;
+  enc[1] = encFR;
+  enc[2] = encRL;
+  enc[3] = encRR;
 }
 
 
 rcl_publisher_t publisher;
 rcl_subscription_t subscriber;
 geometry_msgs__msg__Twist msg;
+std_msgs__msg__Int32MultiArray arr;
 geometry_msgs__msg__PoseWithCovariance pose;
 geometry_msgs__msg__TwistWithCovariance twist;
 nav_msgs__msg__Odometry odom;
@@ -295,22 +305,10 @@ void timer_callback(rcl_timer_t * timer, int64_t last_call_time)
   RCLC_UNUSED(last_call_time);
   if (timer != NULL) {
     RCSOFTCHECK(rcl_publish(&publisher, &msg, NULL));
-    pose.pose.position.x = 0.0;
-    pose.pose.position.y = 0.0;
-    pose.pose.position.z = 0.0;
-
-    pose.pose.orientation.x = 0.0;
-    pose.pose.orientation.y = 0.0;
-    pose.pose.orientation.z = 0.0;
-    pose.pose.orientation.w = 1.0;
-    
-    twist.twist.linear.x = 0.0;
-    twist.twist.linear.y = 0.0;
-    twist.twist.linear.z = 0.0;
-  
-    twist.twist.angular.x = 0.0;
-    twist.twist.angular.y = 0.0;
-    twist.twist.angular.z = 0.0;  
+    for (size_t i = 0; i < 4; ++i)
+    {
+        arr.data.data[i] = enc[i];
+    }
   }
 } 
 
@@ -327,7 +325,7 @@ void setup() {
 
   encoder_config();
 
-  set_microros_wifi_transports("WIFI", "a9111707000", "192.168.43.225", 8888);
+  set_microros_wifi_transports("WIFI", "a9111707000", "192.168.0.105", 8888);
 
 //  set_microros_transports();
   pinMode(LED_PIN, OUTPUT);  
@@ -344,29 +342,21 @@ void setup() {
   RCCHECK(rclc_node_init_default(&node, "bot_node", "", &support));
 
   // create publisher
-  RCCHECK(rclc_publisher_init_default(
+    RCCHECK(rclc_publisher_init_default(
     &publisher,
     &node,
-    ROSIDL_GET_MSG_TYPE_SUPPORT(nav_msgs, msg, Odometry),
-    "odom"));
+    ROSIDL_GET_MSG_TYPE_SUPPORT(std_msgs, msg, Int32MultiArray),
+    "enc_values"));
 
-    pose.pose.position.x = 0.0;
-    pose.pose.position.y = 0.0;
-    pose.pose.position.z = 0.0;
+    arr.data.data = (int32_t *)malloc(sizeof(int32_t) * 4);
+    arr.data.size = 4;
 
-    pose.pose.orientation.x = 0.0;
-    pose.pose.orientation.y = 0.0;
-    pose.pose.orientation.z = 0.0;
-    pose.pose.orientation.w = 1.0;
+    // Populate the message data with encoder values
+    for (size_t i = 0; i < 4; ++i)
+    {
+        arr.data.data[i] = enc[i];
+    }
     
-    twist.twist.linear.x = 0.0;
-    twist.twist.linear.y = 0.0;
-    twist.twist.linear.z = 0.0;
-  
-    twist.twist.angular.x = 0.0;
-    twist.twist.angular.y = 0.0;
-    twist.twist.angular.z = 0.0;  
-
   // create subscriber
   RCCHECK(rclc_subscription_init_default(
     &subscriber,
@@ -384,28 +374,15 @@ void loop() {
   
   read_encoder_values();
   
-  Serial.println(encRL);
-  
-  RCSOFTCHECK(rcl_publish(&publisher, &msg, NULL));
-
-    RCSOFTCHECK(rcl_publish(&publisher, &msg, NULL));
+//  Serial.println(enc[);
     
-    pose.pose.position.x = encFL;
-    pose.pose.position.y = encFR;
-    pose.pose.position.z = encRL;
-
-    pose.pose.orientation.x = encRR;
-    pose.pose.orientation.y = 0.0;
-    pose.pose.orientation.z = 0.0;
-    pose.pose.orientation.w = 1.0;
+    for (size_t i = 0; i < 4; ++i)
+    {
+        arr.data.data[i] = enc[i];
+        Serial.println(enc[i]);
+    }
     
-    twist.twist.linear.x = encFL;
-    twist.twist.linear.y = encFR;
-    twist.twist.linear.z = encRL;
-  
-    twist.twist.angular.x = encRR;
-    twist.twist.angular.y = 0.0;
-    twist.twist.angular.z = 0.0;  
+  RCSOFTCHECK(rcl_publish(&publisher, &arr, NULL));
   
   RCCHECK(rclc_executor_spin_some(&executor, RCL_MS_TO_NS(1)));
   int pwm = int(msg.linear.x);

@@ -56,7 +56,7 @@ void setup() {
   pinMode(xAxis,INPUT);
   pinMode(yAxis,INPUT);
   
-  set_microros_wifi_transports("WIFI", "a9111707000", "192.168.43.225", 8888);
+  set_microros_wifi_transports("WIFI", "a9111707000", "192.168.0.105", 8888);
 
   pinMode(LED_PIN, OUTPUT);
   digitalWrite(LED_PIN, HIGH);
